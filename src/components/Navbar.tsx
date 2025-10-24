@@ -97,9 +97,6 @@ export default function Navbar() {
           <div className="sf-navbar__mobile-inner" onClick={(e) => e.stopPropagation()}>
             <NavLink to="/home" onClick={() => setMobileOpen(false)} className={({ isActive }) => (isActive ? 'sf-navbar__link active' : 'sf-navbar__link')}>Home</NavLink>
             <NavLink to="/about" onClick={() => setMobileOpen(false)} className={({ isActive }) => (isActive ? 'sf-navbar__link active' : 'sf-navbar__link')}>Sobre nosotros</NavLink>
-            <NavLink to="/sitemap" onClick={() => setMobileOpen(false)} className={({ isActive }) => (isActive ? 'sf-navbar__link active sf-navbar__sitemap' : 'sf-navbar__link sf-navbar__sitemap')}>
-              <FaMap style={{ marginRight: 6 }} /> Mapa del Sitio
-            </NavLink>
 
             <div className="sf-navbar__mobile-section">
               <h3>Opciones</h3>
