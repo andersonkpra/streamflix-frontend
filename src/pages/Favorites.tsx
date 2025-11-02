@@ -13,26 +13,32 @@ export default function FavoritesPage() {
     "https://via.placeholder.com/240x360/111/fff?text=StreamFlix";
 
   useEffect(() => {
+    // Guard flag prevents updating state after the component unmounts.
+    let active = true;
+
     (async () => {
       try {
         const data = await favSvc.getFavorites();
-        // Mapeo para asegurar que cada favorito tenga todos los datos
-        const mapped = data.map(f => ({
-          movieId: f.movieId,
-          title: f.title || f.movie?.title || "Sin título",
-          year: f.year || f.movie?.year,
-          posterUrl: f.posterUrl || f.movie?.posterUrl || posterFallback,
-          videoUrl: f.videoUrl || f.movie?.videoUrl,
-        }));
-        setFavorites(mapped);
+        if (!active) return;
+
+        console.log("Favoritos cargados:", data);
+        setFavorites(Array.isArray(data) ? data : []);
       } catch (err: any) {
+        if (!active) return;
+
         console.error("Error al cargar favoritos:", err);
         setError(err.message || "Error cargando favoritos");
       } finally {
+        if (!active) return;
+
         setLoading(false);
       }
     })();
-  }, [enrichMetadata]);
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleRemoveFavorite = async (movieId: string) => {
     try {
@@ -54,17 +60,21 @@ export default function FavoritesPage() {
         <p style={styles.empty}>No has agregado ninguna película a favoritos.</p>
       ) : (
         <div style={styles.grid}>
-          {favorites.map(fav => (
-            <div key={fav.movieId} style={{ width: "100%" }}>
+          {favorites.map((fav) => {
+            const movie = fav.movie;
+            const movieId = movie?.id ?? fav.movieId;
+            const poster = movie?.posterUrl ?? movie?.poster ?? posterFallback;
+            return (
               <MovieCard
-                id={fav.movieId}
-                title={fav.title}
-                year={fav.year}
-                poster={fav.posterUrl}
-                videoUrl={fav.videoUrl}
-                isFavorite={true}
-                onPlay={m => setPlaying(m)}
-                onToggleFavorite={() => handleRemoveFavorite(fav.movieId)}
+                key={fav._id || movieId}
+                id={movieId}
+                title={movie?.title || "Sin título"}
+                year={movie?.year}
+                poster={poster}
+                videoUrl={movie?.videoUrl || ""}
+                isFavorited={true}
+                onPlay={(movie) => setPlaying(movie)}
+                onFavoriteRemoved={handleRemoved}
               />
             </div>
           ))}

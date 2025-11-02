@@ -17,69 +17,101 @@ export default function MovieCard({
   year,
   poster,
   videoUrl,
+  overview,
+  rating,
+  isFavorited = false,
   onPlay,
-  isFavorite = false,
-  onToggleFavorite,
+  onFavoriteRemoved,
+  onFavoriteAdded,
 }: MovieCardProps) {
-  const [hovered, setHovered] = useState(false);
+  const [fav, setFav] = useState<boolean>(isFavorited);
+  const [busy, setBusy] = useState(false);
+
+  const canPlay = Boolean(videoUrl);
+  const playLabel = canPlay ? "Ver trailer" : "Sin video";
+  const posterUrl = poster && poster.startsWith("http") ? poster : "https://via.placeholder.com/240x360/111/fff?text=StreamFlix";
 
   const payload: PlayPayload = {
     id,
     title,
-    poster,
+    poster: posterUrl,
     year,
     videoUrl,
     overview,
     rating,
   };
 
+  async function handleAdd() {
+    try {
+      setBusy(true);
+      await favSvc.addFavorite({
+        id,
+        title,
+        posterUrl,
+        year,
+        videoUrl,
+        overview,
+        rating,
+      });
+      setFav(true);
+      onFavoriteAdded?.(payload);
+    } catch (e) {
+      console.error("Add favorite error", e);
+      alert("Failed to add favorite");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRemove() {
+    try {
+      setBusy(true);
+      await favSvc.removeFavorite(id);
+      setFav(false);
+      onFavoriteRemoved?.(id);
+    } catch (e) {
+      console.error("Remove favorite error", e);
+      alert("Failed to remove favorite");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <div
-      style={{
-        ...cardStyles.container,
-        transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: hovered
-          ? "0 12px 24px rgba(0,0,0,0.3)"
-          : "0 4px 12px rgba(0,0,0,0.2)",
-        transition: "all 0.2s ease-in-out",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <img src={poster} alt={title} style={cardStyles.poster} />
-      <div style={cardStyles.info}>
-        <h3 style={cardStyles.title}>{title}</h3>
-        {year && <p style={cardStyles.year}>{year}</p>}
-      </div>
-      <div style={cardStyles.spacer} />
-      <div style={cardStyles.buttons}>
-        <button
-          style={{
-            ...cardStyles.playButton,
-            transition: "background-color 0.2s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1e40af")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
-          onClick={() => onPlay({ id, videoUrl })}
-        >
-          Reproducir
-        </button>
-        <button
-          style={{
-            ...cardStyles.favoriteButton,
-            backgroundColor: isFavorite ? "#ef4444" : "#f97316",
-            transition: "background-color 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = isFavorite ? "#dc2626" : "#fb923c")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = isFavorite ? "#ef4444" : "#f97316")
-          }
-          onClick={onToggleFavorite}
-        >
-          {isFavorite ? "Favorito" : "Agregar"}
-        </button>
+    <div style={styles.card}>
+      <div
+        style={{
+          ...styles.poster,
+          backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0) 45%, rgba(15,23,42,0.92) 100%), url(${posterUrl})`,
+        }}
+      />
+      <div style={styles.body}>
+        <div>
+          <h3 style={styles.title}>{title}</h3>
+          <span style={styles.meta}>{year || "—"}</span>
+        </div>
+        <div style={styles.actions}>
+          <button
+            style={{
+              ...styles.btnPrimary,
+              opacity: canPlay ? 1 : 0.55,
+              cursor: canPlay ? "pointer" : "not-allowed",
+            }}
+            onClick={() => canPlay && onPlay && onPlay(payload)}
+            disabled={!canPlay}
+          >
+            {playLabel}
+          </button>
+          {!fav ? (
+            <button style={styles.btnGhost} onClick={handleAdd} disabled={busy}>
+              Añadir a favoritos
+            </button>
+          ) : (
+            <button style={styles.btnDanger} onClick={handleRemove} disabled={busy}>
+              Quitar
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

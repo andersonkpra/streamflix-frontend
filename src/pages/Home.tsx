@@ -76,7 +76,8 @@ export default function Home() {
                   year={mm.releaseYear || mm.year}
                   poster={mm.thumbnailUrl || mm.posterUrl || posterFallback}
                   videoUrl={mm.videoUrl}
-                  isFavorite={isFav}
+                  overview={mm.overview || mm.description}
+                  rating={typeof mm.rating === "number" ? mm.rating : mm.voteAverage}
                   onPlay={(payload: any) => setPlayingMovie(payload)}
                   onToggleFavorite={() => toggleFavorite(mm)}
                 />

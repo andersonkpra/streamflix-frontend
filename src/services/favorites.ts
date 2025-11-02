@@ -1,5 +1,19 @@
 import { API_BASE } from "./api";
-import { getMovies } from "./movies"; // ⚠️ importa para completar datos
+
+/**
+ * Favorites service.
+ * Handles fetching, adding and removing favorite movies.
+ */
+export type FavoriteMovie = {
+  id: string;
+  title: string;
+  posterUrl?: string;
+  poster?: string;
+  year?: number;
+  videoUrl?: string;
+  overview?: string;
+  rating?: number;
+};
 
 export type FavoriteItem = {
   _id?: string;
