@@ -1,15 +1,17 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
 import { getMovies, type Movie } from "../services/movies";
 import favSvc from "../services/favorites";
 import MovieCard from "../components/MovieCard";
 import Player from "../components/Player";
 
 export default function Home() {
+  const navigate = useNavigate();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [playingMovie, setPlayingMovie] = useState<any | null>(null);
-  const [favorites, setFavorites] = useState<string[]>([]); // IDs de favoritos
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const posterFallback = "https://via.placeholder.com/240x360/111/fff?text=StreamFlix";
 
@@ -20,7 +22,7 @@ export default function Home() {
         setMovies(moviesData);
 
         const favs = await favSvc.getFavorites();
-        setFavorites(favs.map(f => f.movieId)); // solo IDs
+        setFavorites(favs.map((f) => f.movieId));
       } catch (e: any) {
         setError(e?.message || "Error cargando las películas");
       } finally {
@@ -34,7 +36,7 @@ export default function Home() {
     try {
       if (favorites.includes(movieId)) {
         await favSvc.removeFavorite(movieId);
-        setFavorites(favorites.filter(id => id !== movieId));
+        setFavorites((prev) => prev.filter((id) => id !== movieId));
       } else {
         await favSvc.addFavorite({
           movieId,
@@ -43,7 +45,7 @@ export default function Home() {
           posterUrl: movie.thumbnailUrl || movie.posterUrl,
           videoUrl: movie.videoUrl,
         });
-        setFavorites([...favorites, movieId]);
+        setFavorites((prev) => [...prev, movieId]);
       }
     } catch (e) {
       console.error("Error al actualizar favoritos", e);
@@ -58,7 +60,8 @@ export default function Home() {
       <header style={styles.hero}>
         <h1 style={styles.title}>Disfruta los estrenos estelares</h1>
         <p style={styles.subtitle}>
-          Explora un catálogo curado, reproduce avances en un reproductor envolvente y guarda tus favoritos al instante.
+          Explora un catálogo curado, reproduce avances en un reproductor envolvente y guarda tus
+          favoritos al instante.
         </p>
       </header>
 
@@ -66,11 +69,12 @@ export default function Home() {
         <div style={styles.grid}>
           {movies.map((m) => {
             const mm = m as any;
-            const isFav = favorites.includes(mm._id || mm.id);
+            const movieId = mm._id || mm.id;
+            const isFav = favorites.includes(movieId);
             return (
-              <div key={mm._id || mm.id} style={styles.cardWrapper}>
+              <div key={movieId} style={styles.cardWrapper}>
                 <MovieCard
-                  id={mm._id || mm.id}
+                  id={movieId}
                   title={mm.title}
                   year={mm.releaseYear || mm.year}
                   poster={mm.thumbnailUrl || mm.posterUrl || posterFallback}
@@ -78,6 +82,7 @@ export default function Home() {
                   isFavorite={isFav}
                   onPlay={(payload: any) => setPlayingMovie(payload)}
                   onToggleFavorite={() => toggleFavorite(mm)}
+                  onOpenDetail={() => navigate(`/movie/${movieId}`)} // ✅ solo la imagen/título abre detalle
                 />
               </div>
             );

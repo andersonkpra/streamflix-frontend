@@ -9,18 +9,35 @@
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between; /* cambio para distribuir texto y enlace */
     padding: 6px 12px;
+    flex-wrap: wrap;
   }
+
   &__copy {
     color: var(--muted, #b3b3b3);
     font-size: 13px;
     text-align: center;
   }
-  
+
+  &__manual {
+    color: var(--muted, #b3b3b3);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  &__manual:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+
   @media (max-width: 640px) {
-    &__inner { padding: 12px; }
+    &__inner { 
+      flex-direction: column; 
+      gap: 6px; 
+    }
     &__copy { font-size: 12px; }
+    &__manual { font-size: 12px; }
   }
 }
-

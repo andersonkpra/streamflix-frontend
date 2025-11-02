@@ -6,9 +6,10 @@ type MovieCardProps = {
   year?: number;
   poster: string;
   videoUrl?: string;
-  onPlay: (payload: any) => void;
   isFavorite?: boolean;
+  onPlay?: (payload: any) => void;
   onToggleFavorite?: () => void;
+  onOpenDetail?: () => void; // new: only image/title opens detail
 };
 
 export default function MovieCard({
@@ -17,9 +18,10 @@ export default function MovieCard({
   year,
   poster,
   videoUrl,
-  onPlay,
   isFavorite = false,
+  onPlay,
   onToggleFavorite,
+  onOpenDetail,
 }: MovieCardProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -28,37 +30,50 @@ export default function MovieCard({
       style={{
         ...cardStyles.container,
         transform: hovered ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: hovered
-          ? "0 12px 24px rgba(0,0,0,0.3)"
-          : "0 4px 12px rgba(0,0,0,0.2)",
-        transition: "all 0.2s ease-in-out",
+        boxShadow: hovered ? "0 12px 24px rgba(0,0,0,0.3)" : "0 4px 12px rgba(0,0,0,0.2)",
+        transition: "all 0.18s ease-in-out",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <img src={poster} alt={title} style={cardStyles.poster} />
+      {/* image clickable only */}
+      <div style={{ cursor: onOpenDetail ? "pointer" : "default" }} onClick={(e) => { e.stopPropagation(); onOpenDetail && onOpenDetail(); }}>
+        <img src={poster} alt={title} style={cardStyles.poster} />
+      </div>
+
       <div style={cardStyles.info}>
-        <h3 style={cardStyles.title}>{title}</h3>
+        <h3
+          style={{ ...cardStyles.title, cursor: onOpenDetail ? "pointer" : "default" }}
+          onClick={(e) => { e.stopPropagation(); onOpenDetail && onOpenDetail(); }}
+        >
+          {title}
+        </h3>
         {year && <p style={cardStyles.year}>{year}</p>}
       </div>
+
       <div style={cardStyles.spacer} />
+
       <div style={cardStyles.buttons}>
         <button
-          style={{
-            ...cardStyles.playButton,
-            transition: "background-color 0.2s",
+          style={cardStyles.playButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPlay && onPlay({ id, videoUrl });
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1e40af")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
-          onClick={() => onPlay({ id, videoUrl })}
         >
           Reproducir
         </button>
+
         <button
           style={{
             ...cardStyles.favoriteButton,
             backgroundColor: isFavorite ? "#ef4444" : "#f97316",
-            transition: "background-color 0.2s",
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite && onToggleFavorite();
           }}
           onMouseEnter={(e) =>
             (e.currentTarget.style.backgroundColor = isFavorite ? "#dc2626" : "#fb923c")
@@ -66,7 +81,6 @@ export default function MovieCard({
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = isFavorite ? "#ef4444" : "#f97316")
           }
-          onClick={onToggleFavorite}
         >
           {isFavorite ? "Favorito" : "Agregar"}
         </button>
@@ -79,24 +93,26 @@ const cardStyles: Record<string, React.CSSProperties> = {
   container: {
     display: "flex",
     flexDirection: "column",
-    height: "100%",
+    height: "100%", // important so grid alignItems: 'stretch' makes all same height
     backgroundColor: "#1e293b",
     borderRadius: 16,
     padding: 12,
     overflow: "hidden",
-    cursor: "pointer",
+    cursor: "default",
   },
   poster: {
     width: "100%",
+    height: 320,
     borderRadius: 12,
     objectFit: "cover",
+    display: "block",
   },
   info: {
     marginTop: 12,
   },
   title: {
     margin: 0,
-    fontSize: "1.1rem",
+    fontSize: "1.05rem",
     color: "#f8fafc",
   },
   year: {
@@ -109,12 +125,11 @@ const cardStyles: Record<string, React.CSSProperties> = {
   },
   buttons: {
     display: "flex",
-    justifyContent: "space-between",
     gap: 8,
   },
   playButton: {
     flex: 1,
-    padding: "6px 12px",
+    padding: "8px 12px",
     borderRadius: 8,
     border: "none",
     cursor: "pointer",
@@ -124,7 +139,7 @@ const cardStyles: Record<string, React.CSSProperties> = {
   },
   favoriteButton: {
     flex: 1,
-    padding: "6px 12px",
+    padding: "8px 12px",
     borderRadius: 8,
     border: "none",
     cursor: "pointer",

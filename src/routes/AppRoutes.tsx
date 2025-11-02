@@ -14,6 +14,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ResetPassword from "../pages/ResetPassword";
+import MovieDetail from "../pages/MovieDetail"; // 👈 Nueva página importada
 
 function LayoutWithNav({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -49,7 +50,14 @@ function LayoutWithNav({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar loggedIn={loggedIn} username={username} onLogout={handleLogout} />
-      <main style={{ padding: "20px", maxWidth: 1200, margin: "0 auto", paddingBottom: 80 }}>
+      <main
+        style={{
+          padding: "20px",
+          maxWidth: 1200,
+          margin: "0 auto",
+          paddingBottom: 80,
+        }}
+      >
         {children}
       </main>
       <Footer />
@@ -60,20 +68,36 @@ function LayoutWithNav({ children }: { children: React.ReactNode }) {
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Públicas */}
-      <Route path="/" element={<LayoutWithNav><Landing /></LayoutWithNav>} />
+      {/* 🌐 Públicas */}
+      <Route
+        path="/"
+        element={
+          <LayoutWithNav>
+            <Landing />
+          </LayoutWithNav>
+        }
+      />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route path="/about" element={<LayoutWithNav><About /></LayoutWithNav>} />
+      <Route
+        path="/about"
+        element={
+          <LayoutWithNav>
+            <About />
+          </LayoutWithNav>
+        }
+      />
 
-      {/* Privadas */}
+      {/* 🔒 Privadas */}
       <Route
         path="/home"
         element={
           <ProtectedRoute>
-            <LayoutWithNav><Home /></LayoutWithNav>
+            <LayoutWithNav>
+              <Home />
+            </LayoutWithNav>
           </ProtectedRoute>
         }
       />
@@ -81,7 +105,9 @@ export default function AppRoutes() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <LayoutWithNav><Profile /></LayoutWithNav>
+            <LayoutWithNav>
+              <Profile />
+            </LayoutWithNav>
           </ProtectedRoute>
         }
       />
@@ -89,12 +115,34 @@ export default function AppRoutes() {
         path="/favorites"
         element={
           <ProtectedRoute>
-            <LayoutWithNav><Favorites /></LayoutWithNav>
+            <LayoutWithNav>
+              <Favorites />
+            </LayoutWithNav>
           </ProtectedRoute>
         }
       />
 
-      <Route path="/sitemap" element={<LayoutWithNav><Sitemap /></LayoutWithNav>} />
+      {/* 🗺️ Mapa del sitio */}
+      <Route
+        path="/sitemap"
+        element={
+          <LayoutWithNav>
+            <Sitemap />
+          </LayoutWithNav>
+        }
+      />
+
+      {/* 🎬 Nueva ruta: detalle de película */}
+      <Route
+        path="/movie/:id"
+        element={
+          <ProtectedRoute>
+            <LayoutWithNav>
+              <MovieDetail />
+            </LayoutWithNav>
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
